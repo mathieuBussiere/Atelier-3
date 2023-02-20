@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <label for="city">Ville</label>
+    <input type="text" id="city">
+
+    <input type="submit" id="submit" value="Prévisions" onclick="ChangeTown()">
+
+    <div id="lineChart"></div>
+</body>
+
+<script src="jquery/jquery-3.4.1.min.js"></script>
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script defer>
+    var data = null;
+    var city = "Blainville";
+    let weather = [];
+    google.charts.load('current', { packages: ['corechart'], language: 'fr' });
+    $(document).ready(() => {
+        google.charts.setOnLoadCallback(ChangeTown);
+    });
+
+    function SetData() {
+        let information = [];
+        // Define the chart to be drawn.
+        if (weather.length == 0) {
+            ville = ChangeTown();
+        }
+        weather.forEach(element => {
+            information.push([element["dt_txt"], element["main"]["temp_max"], element["main"]["temp_min"]])
+        });
+        data = new google.visualization.DataTable();
+        data.addColumn('string', 'date');
+        data.addColumn('number', 'Maximum');
+        data.addColumn('number', 'Minimum');
+        data.addRows(information);
+        drawChart(information);
+    }
+
+    function drawChart(information) {
+        // Instantiate and draw the chart.
+        var options = {
+            title: city+" - Prévision 14 jours 2020",
+            titleTextStyle: { fontSize: '32', color: 'green' },
+            series: { 0: { color: 'cyan' } }
+        };
+
+        var lineChart = new google.visualization.LineChart(document.getElementById('lineChart'));
+        lineChart.draw(data, options);
+    }
+
+    function ChangeTown() {
+        console.log("changement de la ville");
+        if (document.getElementById("city").value == "") {
+            city = "Blainville";
+            console.log("pas de ville");
+        }
+        else{
+            city = document.getElementById("city").value;
+            console.log("une ville");
+        }
+
+        let apiKey = "e0f78b31f4a50cdb58d8f08550e8247d";
+        let url = "https://api.openweathermap.org/data/2.5/forecast?units=metric&q=" + city + "&appid=" + apiKey;
+        "https://api.openweathermap.org/data/2.5/forecast/daily?units=metric&q="
+
+        $.ajax({
+            url: url,
+            success: (result) => {
+                weather = result.list;
+                SetData();
+            },
+            error: (errorThrown) => {
+                console.log(errorThrown);
+            }
+        })
+    }
+</script>
+
+</html>
